@@ -1,11 +1,12 @@
 fetch('files.json')
     .then(response => response.json())
-    .then(data => {
+    .then(files => {
         const gallery = document.querySelector('.gallery');
-        data.forEach(item => {
+
+        files.forEach(item => {
             const galleryItem = document.createElement('div');
             galleryItem.classList.add('gallery-item');
-            
+
             const extension = item.url.split('.').pop().toLowerCase();
             let mediaElement;
 
@@ -26,47 +27,40 @@ fetch('files.json')
             galleryItem.setAttribute('data-url', item.url);
             gallery.appendChild(galleryItem);
 
-            galleryItem.addEventListener('click', () => {
-                openModal(item.url);
-            });
+            galleryItem.addEventListener('click', () => openModal(item.url));
         });
 
-        document.getElementById('close-modal').addEventListener('click', closeModal);
-        document.getElementById('copy-link').addEventListener('click', copyLink);
+        function openModal(url) {
+            const modal = document.getElementById('media-modal');
+            const modalVideo = document.getElementById('modal-video');
+            const modalImage = document.getElementById('modal-image');
+
+            const extension = url.split('.').pop().toLowerCase();
+            if (['mp4', 'webm', 'mov'].includes(extension)) {
+                modalVideo.src = url;
+                modalVideo.style.display = 'block';
+                modalImage.style.display = 'none';
+            } else {
+                modalImage.src = url;
+                modalImage.style.display = 'block';
+                modalVideo.style.display = 'none';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            const modal = document.getElementById('media-modal');
+            modal.style.display = 'none';
+            document.getElementById('modal-video').pause();
+            document.getElementById('modal-video').currentTime = 0;
+        });
+
+        document.getElementById('copy-link').addEventListener('click', (event) => {
+            const link = event.target.closest('.media-modal').querySelector('[data-url]').getAttribute('data-url');
+            navigator.clipboard.writeText(link)
+                .then(() => alert('Link copied to clipboard!'))
+                .catch(err => alert('Failed to copy link!'));
+        });
     })
-    .catch(error => console.error('Error loading files.json:', error));
-
-function openModal(url) {
-    const modal = document.getElementById('media-modal');
-    const modalVideo = document.getElementById('modal-video');
-    const modalImage = document.getElementById('modal-image');
-    
-    const extension = url.split('.').pop().toLowerCase();
-
-    if (['mp4', 'webm', 'mov'].includes(extension)) {
-        modalVideo.src = url;
-        modalVideo.style.display = 'block';
-        modalImage.style.display = 'none';
-    } else {
-        modalImage.src = url;
-        modalImage.style.display = 'block';
-        modalVideo.style.display = 'none';
-    }
-
-    modal.style.display = 'flex';
-}
-
-function closeModal() {
-    const modal = document.getElementById('media-modal');
-    const modalVideo = document.getElementById('modal-video');
-    modal.style.display = 'none';
-    modalVideo.pause();
-    modalVideo.currentTime = 0;
-}
-
-function copyLink(event) {
-    const link = event.target.closest('.media-modal').querySelector('[data-url]').getAttribute('data-url');
-    navigator.clipboard.writeText(link)
-        .then(() => alert('Link copied to clipboard!'))
-        .catch(err => alert('Failed to copy link!'));
-}
+    .catch(err => console.error('Error loading files.json:', err));
