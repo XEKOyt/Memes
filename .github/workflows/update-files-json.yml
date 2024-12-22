@@ -20,29 +20,38 @@ jobs:
 
       - name: Generate files.json
         run: |
-          # Start with an empty files.json
-          echo '[]' > files.json
+          # Start with an empty files.json if it doesn't exist
+          [ ! -f files.json ] && echo '[]' > files.json
 
           # Find and process all supported media files
           echo "Looking for files..."
           find . -type f \( -name "*.mp4" -o -name "*.webm" -o -name "*.mov" -o -name "*.gif" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) | sed 's|^./||' | while read file; do
-            echo "Adding file: $file"
-            jq ". + [{\"name\": \"$(basename "$file")\", \"url\": \"https://xekoyt.github.io/Memes/$file\"}]" files.json > tmp.json && mv tmp.json files.json
+            if [ -n "$file" ]; then
+              echo "Adding file: $file"
+              if ! jq -e ".[] | select(.url == \"https://xekoyt.github.io/Memes/$file\")" files.json > /dev/null; then
+                jq ". + [{\"name\": \"$(basename "$file")\", \"url\": \"https://xekoyt.github.io/Memes/$file\"}]" files.json > tmp.json && mv tmp.json files.json
+              fi
+            else
+              echo "Skipping empty or invalid file entry"
+            fi
           done
 
           # Debugging: print out the current content of files.json
           echo "files.json content:"
           cat files.json
 
+      - name: Validate files.json
+        run: jq empty files.json || (echo "Invalid JSON format" && exit 1)
+
       - name: Commit and Push
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          
-          # Check if there are changes
-          git status
 
-          # If changes, commit and push
+          # Pull changes from remote to avoid conflicts
+          git pull origin main --rebase || echo "No changes to pull"
+
+          # Commit and push changes
           git add files.json
           git commit -m "Update files.json with new media files" || echo "No changes to commit"
           git push
