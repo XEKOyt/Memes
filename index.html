@@ -57,7 +57,7 @@
                     const copyButton = document.createElement('button');
                     copyButton.classList.add('copy-link-btn');
                     copyButton.setAttribute('data-link', item.url);
-                    copyButton.textContent = 'Copy Link';
+                    copyButton.innerHTML = `<span class="copy-text">Copy Link</span><span class="checkmark">&#10003;</span>`;
                     mediaItem.appendChild(copyButton);
 
                     gallery.appendChild(mediaItem);
@@ -101,7 +101,10 @@
                         const link = this.getAttribute('data-link');
                         navigator.clipboard.writeText(link)
                             .then(() => {
-                                alert('Link copied to clipboard!');
+                                this.classList.add('copied');
+                                setTimeout(() => {
+                                    this.classList.remove('copied');
+                                }, 1500);
                             })
                             .catch(err => {
                                 alert('Failed to copy link!');
