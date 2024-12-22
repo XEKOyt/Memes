@@ -1,3 +1,27 @@
+// Toggle dark/light mode
+const modeSwitch = document.getElementById('mode-switch');
+const body = document.body;
+const searchBar = document.getElementById('search-bar');
+let isDarkMode = true;
+
+modeSwitch.addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    body.classList.toggle('dark-mode', isDarkMode);
+    body.classList.toggle('light-mode', !isDarkMode);
+    modeSwitch.textContent = isDarkMode ? '🌙' : '🌞';
+});
+
+// Search functionality
+searchBar.addEventListener('input', (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    galleryItems.forEach(item => {
+        const name = item.getAttribute('data-name').toLowerCase();
+        item.style.display = name.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Fetch files from files.json
 fetch('files.json')
     .then(response => response.json())
     .then(files => {
