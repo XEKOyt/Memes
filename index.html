@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            background-color: #f0f0f0;
             color: #333;
         }
 
@@ -18,14 +18,15 @@
             color: white;
             text-align: center;
             padding: 20px;
-            font-size: 24px;
+            font-size: 30px;
+            font-weight: 700;
         }
 
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            padding: 20px;
+            padding: 30px;
         }
 
         .gallery-item {
@@ -94,6 +95,52 @@
             max-height: 70vh;
         }
 
+        .custom-video-player {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .custom-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 15px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 5px;
+        }
+
+        .play-btn, .pause-btn, .volume-slider, .progress-bar, .fullscreen-btn {
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 5px;
+            background: #555;
+            border-radius: 5px;
+            margin: 0 10px;
+        }
+
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            background: #f00;
+            width: 0;
+            border-radius: 5px;
+        }
+
+        .volume-slider {
+            width: 100px;
+        }
     </style>
 </head>
 <body>
@@ -108,8 +155,10 @@
     <div class="modal-content">
         <button class="close-btn" id="closeBtn">X</button>
         <button class="copy-btn" id="copyBtn">Copy Link</button>
-        <img id="modalImage" style="display:none;">
-        <video id="modalVideo" controls style="display:none;"></video>
+        <div id="modalMedia" class="custom-video-player">
+            <img id="modalImage" style="display:none;">
+            <video id="modalVideo" style="display:none;"></video>
+        </div>
     </div>
 </div>
 
@@ -120,6 +169,7 @@
     const modalVideo = document.getElementById('modalVideo');
     const closeBtn = document.getElementById('closeBtn');
     const copyBtn = document.getElementById('copyBtn');
+    const modalMedia = document.getElementById('modalMedia');
 
     fetch('files.json')
         .then(response => response.json())
@@ -150,6 +200,7 @@
             modalImage.style.display = 'none';
             modalVideo.style.display = 'block';
             modalVideo.src = url;
+            initCustomPlayer(modalVideo);
         } else {
             modalVideo.style.display = 'none';
             modalImage.style.display = 'block';
@@ -158,6 +209,71 @@
 
         modal.style.display = 'flex';
         copyBtn.setAttribute('data-url', url);
+    }
+
+    function initCustomPlayer(video) {
+        video.pause();
+
+        const playBtn = document.createElement('button');
+        playBtn.classList.add('play-btn');
+        playBtn.innerText = 'Play';
+        playBtn.addEventListener('click', () => {
+            video.play();
+            playBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-block';
+        });
+
+        const pauseBtn = document.createElement('button');
+        pauseBtn.classList.add('pause-btn');
+        pauseBtn.innerText = 'Pause';
+        pauseBtn.style.display = 'none';
+        pauseBtn.addEventListener('click', () => {
+            video.pause();
+            playBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+        });
+
+        const progressBar = document.createElement('div');
+        progressBar.classList.add('progress-bar');
+        const progress = document.createElement('span');
+        progressBar.appendChild(progress);
+
+        const volumeSlider = document.createElement('input');
+        volumeSlider.classList.add('volume-slider');
+        volumeSlider.type = 'range';
+        volumeSlider.min = 0;
+        volumeSlider.max = 1;
+        volumeSlider.step = 0.01;
+        volumeSlider.value = 0.5;
+        volumeSlider.addEventListener('input', () => video.volume = volumeSlider.value);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.classList.add('fullscreen-btn');
+        fullscreenBtn.innerText = 'Full Screen';
+        fullscreenBtn.addEventListener('click', () => {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.mozRequestFullScreen) {
+                video.mozRequestFullScreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            }
+        });
+
+        const controlsContainer = document.createElement('div');
+        controlsContainer.classList.add('custom-controls');
+        controlsContainer.appendChild(playBtn);
+        controlsContainer.appendChild(pauseBtn);
+        controlsContainer.appendChild(progressBar);
+        controlsContainer.appendChild(volumeSlider);
+        controlsContainer.appendChild(fullscreenBtn);
+
+        modalMedia.appendChild(controlsContainer);
+
+        video.addEventListener('timeupdate', () => {
+            const progressPercent = (video.currentTime / video.duration) * 100;
+            progress.style.width = `${progressPercent}%`;
+        });
     }
 
     closeBtn.addEventListener('click', () => {
