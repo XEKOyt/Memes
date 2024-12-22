@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memes Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        a {
+            color: #61dafb;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .file-item {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Memes Gallery</h1>
+    <p>Click a file to view or share it:</p>
+    <div id="file-list"></div>
+    <script>
+        fetch('files.json')
+            .then(response => response.json())
+            .then(files => {
+                const fileList = document.getElementById('file-list');
+                files.forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'file-item';
+                    fileDiv.innerHTML = `<a href="viewer.html?file=${encodeURIComponent(file.url)}">${file.name}</a>`;
+                    fileList.appendChild(fileDiv);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading file list:', error);
+            });
+    </script>
+</body>
+</html>
