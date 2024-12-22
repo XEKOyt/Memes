@@ -9,25 +9,27 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f0f0;
+            background-color: #f4f4f4;
         }
-        h1 {
+        header {
+            background-color: #333;
+            color: white;
             text-align: center;
-            margin: 20px;
+            padding: 10px;
         }
         .gallery {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            padding: 20px;
             justify-content: center;
+            padding: 20px;
         }
         .gallery-item {
             width: 300px;
             height: 300px;
             overflow: hidden;
+            margin: 10px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             cursor: pointer;
         }
         .gallery-item img, .gallery-item video {
@@ -35,7 +37,7 @@
             height: 100%;
             object-fit: cover;
         }
-        #media-modal {
+        .modal {
             display: none;
             position: fixed;
             top: 0;
@@ -52,6 +54,28 @@
             max-width: 80%;
             max-height: 80%;
         }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
         #modal-video {
             width: 100%;
             height: auto;
@@ -60,45 +84,95 @@
             width: 100%;
             height: auto;
         }
-        #close-modal {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #ff0000;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        #copy-link {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: #00ff00;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
 
+<header>
     <h1>Memes Gallery</h1>
+</header>
 
-    <div class="gallery"></div>
+<div class="gallery" id="gallery"></div>
 
-    <div id="media-modal">
-        <div class="modal-content">
-            <button id="close-modal">X</button>
-            <button id="copy-link">Copy Link</button>
-            <img id="modal-image" style="display:none;" />
-            <video id="modal-video" style="display:none;" controls></video>
-        </div>
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" id="close-btn">X</button>
+        <button class="copy-btn" id="copy-btn">Copy Link</button>
+        <img id="modal-image" style="display:none;" />
+        <video id="modal-video" style="display:none;" controls></video>
     </div>
+</div>
 
-    <script src="script.js"></script>
+<script>
+    const gallery = document.getElementById('gallery');
+    const modal = document.getElementById('modal');
+    const closeBtn = document.getElementById('close-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const modalVideo = document.getElementById('modal-video');
+    const modalImage = document.getElementById('modal-image');
+
+    // Fetch data from a JSON file containing media URLs
+    fetch('files.json')
+        .then(response => response.json())
+        .then(files => {
+            files.forEach(file => {
+                const item = document.createElement('div');
+                item.classList.add('gallery-item');
+                item.setAttribute('data-url', file.url);
+                item.setAttribute('data-name', file.name);
+
+                const fileType = file.url.split('.').pop().toLowerCase();
+                if (['mp4', 'webm', 'mov'].includes(fileType)) {
+                    const video = document.createElement('video');
+                    const source = document.createElement('source');
+                    source.src = file.url;
+                    source.type = `video/${fileType}`;
+                    video.appendChild(source);
+                    video.setAttribute('controls', '');
+                    item.appendChild(video);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = file.url;
+                    img.alt = file.name;
+                    item.appendChild(img);
+                }
+
+                item.addEventListener('click', () => openModal(file.url, fileType));
+                gallery.appendChild(item);
+            });
+        });
+
+    // Open the modal with the appropriate media
+    function openModal(url, fileType) {
+        if (fileType === 'mp4' || fileType === 'webm' || fileType === 'mov') {
+            modalImage.style.display = 'none';
+            modalVideo.style.display = 'block';
+            modalVideo.src = url;
+        } else {
+            modalVideo.style.display = 'none';
+            modalImage.style.display = 'block';
+            modalImage.src = url;
+        }
+
+        modal.style.display = 'flex';
+        copyBtn.setAttribute('data-url', url);
+    }
+
+    // Close the modal
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        modalVideo.pause();
+        modalVideo.currentTime = 0;
+    });
+
+    // Copy the media URL to clipboard
+    copyBtn.addEventListener('click', () => {
+        const url = copyBtn.getAttribute('data-url');
+        navigator.clipboard.writeText(url)
+            .then(() => alert('Link copied to clipboard!'))
+            .catch(() => alert('Failed to copy the link.'));
+    });
+</script>
+
 </body>
 </html>
