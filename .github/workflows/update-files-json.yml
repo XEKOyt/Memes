@@ -1,0 +1,35 @@
+name: Update files.json
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-files-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Generate files.json
+      - name: Generate files.json
+        run: |
+          # Create an empty array for files
+          echo '[]' > files.json
+          
+          # Find all media files and add them to files.json
+          find . -type f \( -name "*.mp4" -o -name "*.gif" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) | sed 's|^./||' | while read file; do
+            jq ". + [{\"name\": \"$(basename "$file")\", \"url\": \"https://xekoyt.github.io/Memes/$file\"}]" files.json > tmp.json && mv tmp.json files.json
+          done
+
+      # Commit and push the updated files.json
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add files.json
+          git commit -m "Update files.json"
+          git push
