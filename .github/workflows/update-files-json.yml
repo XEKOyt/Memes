@@ -20,18 +20,23 @@ jobs:
 
       - name: Generate files.json
         run: |
-          # Start with an empty files.json
+
           echo '[]' > files.json
 
-          # Find all supported media files and add them to files.json
           find . -type f \( -name "*.mp4" -o -name "*.webm" -o -name "*.mov" -o -name "*.gif" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) | sed 's|^./||' | while read file; do
+            echo "Adding: $file"
             jq ". + [{\"name\": \"$(basename "$file")\", \"url\": \"https://xekoyt.github.io/Memes/$file\"}]" files.json > tmp.json && mv tmp.json files.json
           done
+
+          cat files.json
 
       - name: Commit and Push
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+
+          git status
+
           git add files.json
-          git commit -m "Update files.json with new media files"
+          git commit -m "Update files.json with new media files" || echo "No changes to commit"
           git push
