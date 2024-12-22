@@ -9,34 +9,44 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f9f9f9;
+            color: #333;
         }
+
         header {
             background-color: #333;
             color: white;
             text-align: center;
-            padding: 10px;
+            padding: 20px;
+            font-size: 24px;
         }
+
         .gallery {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
             padding: 20px;
         }
+
         .gallery-item {
-            width: 300px;
-            height: 300px;
-            overflow: hidden;
-            margin: 10px;
+            background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             cursor: pointer;
+            transition: transform 0.2s ease-in-out;
         }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
         .gallery-item img, .gallery-item video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -44,74 +54,73 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
+
         .modal-content {
             position: relative;
-            max-width: 80%;
+            max-width: 90%;
             max-height: 80%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        .close-btn {
+
+        .close-btn, .copy-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: red;
+            top: 20px;
+            background: #333;
             color: white;
-            border: none;
             padding: 10px;
-            cursor: pointer;
-            border-radius: 50%;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: green;
-            color: white;
             border: none;
-            padding: 10px;
             cursor: pointer;
             border-radius: 5px;
         }
-        #modal-video {
-            width: 100%;
-            height: auto;
+
+        .close-btn {
+            right: 20px;
         }
-        #modal-image {
-            width: 100%;
-            height: auto;
+
+        .copy-btn {
+            left: 20px;
         }
+
+        .modal-content img, .modal-content video {
+            max-width: 100%;
+            max-height: 70vh;
+        }
+
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Memes Gallery</h1>
+    Memes Gallery
 </header>
 
 <div class="gallery" id="gallery"></div>
 
-<div id="modal" class="modal">
+<div class="modal" id="modal">
     <div class="modal-content">
-        <button class="close-btn" id="close-btn">X</button>
-        <button class="copy-btn" id="copy-btn">Copy Link</button>
-        <img id="modal-image" style="display:none;" />
-        <video id="modal-video" style="display:none;" controls></video>
+        <button class="close-btn" id="closeBtn">X</button>
+        <button class="copy-btn" id="copyBtn">Copy Link</button>
+        <img id="modalImage" style="display:none;">
+        <video id="modalVideo" controls style="display:none;"></video>
     </div>
 </div>
 
 <script>
     const gallery = document.getElementById('gallery');
     const modal = document.getElementById('modal');
-    const closeBtn = document.getElementById('close-btn');
-    const copyBtn = document.getElementById('copy-btn');
-    const modalVideo = document.getElementById('modal-video');
-    const modalImage = document.getElementById('modal-image');
+    const modalImage = document.getElementById('modalImage');
+    const modalVideo = document.getElementById('modalVideo');
+    const closeBtn = document.getElementById('closeBtn');
+    const copyBtn = document.getElementById('copyBtn');
 
-    // Fetch data from a JSON file containing media URLs
     fetch('files.json')
         .then(response => response.json())
         .then(files => {
@@ -119,30 +128,23 @@
                 const item = document.createElement('div');
                 item.classList.add('gallery-item');
                 item.setAttribute('data-url', file.url);
-                item.setAttribute('data-name', file.name);
 
                 const fileType = file.url.split('.').pop().toLowerCase();
-                if (['mp4', 'webm', 'mov'].includes(fileType)) {
-                    const video = document.createElement('video');
-                    const source = document.createElement('source');
-                    source.src = file.url;
-                    source.type = `video/${fileType}`;
-                    video.appendChild(source);
-                    video.setAttribute('controls', '');
-                    item.appendChild(video);
+                const mediaElement = (['mp4', 'webm', 'mov'].includes(fileType)) ? document.createElement('video') : document.createElement('img');
+                
+                if (mediaElement.tagName === 'VIDEO') {
+                    mediaElement.src = file.url;
+                    mediaElement.setAttribute('controls', '');
                 } else {
-                    const img = document.createElement('img');
-                    img.src = file.url;
-                    img.alt = file.name;
-                    item.appendChild(img);
+                    mediaElement.src = file.url;
                 }
-
+                
+                item.appendChild(mediaElement);
                 item.addEventListener('click', () => openModal(file.url, fileType));
                 gallery.appendChild(item);
             });
         });
 
-    // Open the modal with the appropriate media
     function openModal(url, fileType) {
         if (fileType === 'mp4' || fileType === 'webm' || fileType === 'mov') {
             modalImage.style.display = 'none';
@@ -158,14 +160,12 @@
         copyBtn.setAttribute('data-url', url);
     }
 
-    // Close the modal
     closeBtn.addEventListener('click', () => {
         modal.style.display = 'none';
         modalVideo.pause();
         modalVideo.currentTime = 0;
     });
 
-    // Copy the media URL to clipboard
     copyBtn.addEventListener('click', () => {
         const url = copyBtn.getAttribute('data-url');
         navigator.clipboard.writeText(url)
