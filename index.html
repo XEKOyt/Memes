@@ -7,18 +7,20 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <header>
         <h1>Memes</h1>
     </header>
 
     <div class="gallery">
-        <!-- Gallery items will be dynamically loaded here -->
+        <!-- Gallery items will be dynamically populated by JS -->
     </div>
 
+    <!-- Modal for displaying media -->
     <div id="media-modal" class="media-modal">
-        <button id="close-modal" class="close-modal">✖</button>
-        <button id="copy-link" class="copy-link">Copy Link</button>
         <div class="modal-content">
+            <button id="close-modal" class="close-btn">✖</button>
+            <button id="copy-link" class="copy-btn">Copy Link</button>
             <video id="modal-video" class="modal-video" controls></video>
             <img id="modal-image" class="modal-image" />
         </div>
