@@ -1,42 +1,12 @@
 [
-  {
-    "name": "cat_dies_ultrakill.mp4",
-    "url": "https://xekoyt.github.io/Memes/cat_dies_ultrakill.mp4"
-  },
-  {
-    "name": "tf2rap.webm",
-    "url": "https://xekoyt.github.io/Memes/tf2rap.webm"
-  },
-  {
-    "name": "catshokbar.jpg",
-    "url": "https://xekoyt.github.io/Memes/catshokbar.jpg"
-  },
-  {
-    "name": "LiveLeakMinosPrime.mp4",
-    "url": "https://xekoyt.github.io/Memes/LiveLeakMinosPrime.mp4"
-  },
-  {
-    "name": "StealingMeme.mp4",
-    "url": "https://xekoyt.github.io/Memes/StealingMeme.mp4"
-  },
-  {
-    "name": "you.png",
-    "url": "https://xekoyt.github.io/Memes/you.png"
-  },
-  {
-    "name": "dogsanta.webm",
-    "url": "https://xekoyt.github.io/Memes/dogsanta.webm"
-  },
-  {
-    "name": "smothiecat.jpg",
-    "url": "https://xekoyt.github.io/Memes/smothiecat.jpg"
-  },
-  {
-    "name": "MEETTHESNIPER.mp4",
-    "url": "https://xekoyt.github.io/Memes/MEETTHESNIPER.mp4"
-  },
-  {
-    "name": "coloride.webm",
-    "url": "https://xekoyt.github.io/Memes/coloride.webm"
-  }
+{"url": "./cat_dies_ultrakill.mp4"},
+{"url": "./tf2rap.webm"},
+{"url": "./catshokbar.jpg"},
+{"url": "./LiveLeakMinosPrime.mp4"},
+{"url": "./StealingMeme.mp4"},
+{"url": "./you.png"},
+{"url": "./dogsanta.webm"},
+{"url": "./smothiecat.jpg"},
+{"url": "./MEETTHESNIPER.mp4"},
+{"url": "./coloride.webm"}
 ]
