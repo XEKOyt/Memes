@@ -25,17 +25,20 @@ fetch('files.json')
 
             galleryItem.appendChild(mediaElement);
             galleryItem.setAttribute('data-url', item.url);
+            galleryItem.setAttribute('data-name', item.name);
             gallery.appendChild(galleryItem);
 
-            galleryItem.addEventListener('click', () => openModal(item.url));
+            galleryItem.addEventListener('click', () => openModal(item.url, item.name, extension));
         });
 
-        function openModal(url) {
+        function openModal(url, name, extension) {
             const modal = document.getElementById('media-modal');
             const modalVideo = document.getElementById('modal-video');
             const modalImage = document.getElementById('modal-image');
 
-            const extension = url.split('.').pop().toLowerCase();
+            const copyLinkBtn = document.getElementById('copy-link');
+            copyLinkBtn.setAttribute('data-url', url);
+
             if (['mp4', 'webm', 'mov'].includes(extension)) {
                 modalVideo.src = url;
                 modalVideo.style.display = 'block';
@@ -57,7 +60,7 @@ fetch('files.json')
         });
 
         document.getElementById('copy-link').addEventListener('click', (event) => {
-            const link = event.target.closest('.media-modal').querySelector('[data-url]').getAttribute('data-url');
+            const link = event.target.getAttribute('data-url');
             navigator.clipboard.writeText(link)
                 .then(() => alert('Link copied to clipboard!'))
                 .catch(err => alert('Failed to copy link!'));
