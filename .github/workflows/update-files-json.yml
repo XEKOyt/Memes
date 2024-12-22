@@ -15,14 +15,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Node.js (Optional)
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-
-    - name: Install dependencies (Optional)
-      run: npm install  # Remove this step if you don't need Node.js
-
     - name: Generate files.json
       run: |
         echo "[" > files.json
@@ -32,10 +24,6 @@ jobs:
         # Remove the trailing comma and close the JSON array
         sed -i '$ s/,$//' files.json
         echo "]" >> files.json
-
-    - name: Build the site (Optional)
-      run: |
-        echo "Building the site..."  # Replace with your site's build commands if necessary
 
     - name: Commit and Push changes
       run: |
