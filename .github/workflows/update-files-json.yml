@@ -1,40 +1,101 @@
-name: Deploy to GitHub Pages
+name: Update Media Files List
 
 on:
   push:
     branches:
       - main
-    paths:
-      - '**/*'  # Watch all file types in the repository
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
-  deploy:
+  update-files:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for proper git operations
 
     - name: Generate files.json
       run: |
-        echo "[" > files.json
-        for file in $(find ./ -type f \( -iname "*.mp4" -o -iname "*.webm" -o -iname "*.gif" -o -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.mp3" -o -iname "*.ogg" -o -iname "*.wav" -o -iname "*.avi" -o -iname "*.mov" -o -iname "*.flac" -o -iname "*.mpg" -o -iname "*.mkv" \)); do
-          echo "{\"url\": \"$file\"}," >> files.json
+        # Create a temporary file to build our JSON
+        echo "["  > temp_files.json
+        
+        # Find media files and process them
+        find . -type f \( \
+          -iname "*.mp4" -o \
+          -iname "*.webm" -o \
+          -iname "*.gif" -o \
+          -iname "*.jpg" -o \
+          -iname "*.png" -o \
+          -iname "*.jpeg" -o \
+          -iname "*.mp3" -o \
+          -iname "*.ogg" -o \
+          -iname "*.wav" -o \
+          -iname "*.avi" -o \
+          -iname "*.mov" -o \
+          -iname "*.flac" -o \
+          -iname "*.mpg" -o \
+          -iname "*.mkv" \
+        \) -not -path "*/.git/*" -not -path "*/node_modules/*" | while read -r file; do
+          # Remove leading ./
+          clean_path="${file#./}"
+          # Only process if not in excluded directories
+          if [[ "$clean_path" != .git/* ]] && [[ "$clean_path" != .github/* ]]; then
+            # Get file size in bytes
+            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
+            # Get last modified time in ISO format
+            modified=$(date -r "$file" -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -d "@$(stat -c%Y "$file")" -u +"%Y-%m-%dT%H:%M:%SZ")
+            # Get file extension
+            ext="${file##*.}"
+            # Add to JSON with proper escaping
+            echo "  {
+      \"url\": \"$clean_path\",
+      \"size\": $size,
+      \"modified\": \"$modified\",
+      \"type\": \"${ext,,}\"
+    }," >> temp_files.json
+          fi
         done
-        # Remove the trailing comma and close the JSON array
-        sed -i '$ s/,$//' files.json
-        echo "]" >> files.json
+        
+        # Remove trailing comma and close the array
+        sed -i '$ s/,$//' temp_files.json
+        echo "]" >> temp_files.json
+        
+        # Check if JSON is valid
+        if jq empty temp_files.json; then
+          mv temp_files.json files.json
+        else
+          echo "Error: Generated JSON is invalid"
+          cat temp_files.json
+          exit 1
+        fi
+
+    - name: Check for changes
+      id: check_changes
+      run: |
+        if git diff --quiet files.json; then
+          echo "No changes to files.json"
+          echo "changes_detected=false" >> $GITHUB_OUTPUT
+        else
+          echo "Changes detected in files.json"
+          echo "changes_detected=true" >> $GITHUB_OUTPUT
+        fi
 
     - name: Commit and Push changes
+      if: steps.check_changes.outputs.changes_detected == 'true'
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git add files.json
-        git commit -m "Update media list"
+        git commit -m "Update media files list [skip ci]"
         git push
-
+      
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./  # Adjust this if your output files are in a different directory
+        publish_dir: ./
+        force_orphan: true  # This ensures clean deployment history
