@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Check out this meme!">
+    <meta property="og:type" content="video.other">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <meta property="og:video" content="">
+    <title>Meme Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        video, img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Viewing Meme</h1>
+    <div id="media-container"></div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const file = params.get('file');
+
+        if (file) {
+            const mediaContainer = document.getElementById('media-container');
+            const ext = file.split('.').pop().toLowerCase();
+            const ogUrl = document.querySelector('meta[property="og:url"]');
+            const ogImage = document.querySelector('meta[property="og:image"]');
+            const ogVideo = document.querySelector('meta[property="og:video"]');
+
+            ogUrl.content = file;
+            ogVideo.content = ext === 'mp4' ? file : '';
+            ogImage.content = ext === 'gif' || ext === 'jpg' || ext === 'png' ? file : '';
+
+            if (['mp4', 'webm', 'ogg'].includes(ext)) {
+                mediaContainer.innerHTML = `<video controls autoplay><source src="${file}" type="video/${ext}">Your browser does not support the video tag.</video>`;
+            } else if (['gif', 'jpg', 'jpeg', 'png'].includes(ext)) {
+                mediaContainer.innerHTML = `<img src="${file}" alt="Meme">`;
+            } else {
+                mediaContainer.innerHTML = `<p>Unsupported file type: ${ext}</p>`;
+            }
+        } else {
+            document.body.innerHTML = '<p>No file specified.</p>';
+        }
+    </script>
+</body>
+</html>

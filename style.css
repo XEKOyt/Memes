@@ -1,0 +1,81 @@
+/* Global Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+.gallery-item {
+    width: calc(33.333% - 20px);
+    border: 2px solid #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.gallery-item img, .gallery-item video {
+    width: 100%;
+    height: 100%;
+}
+
+#media-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+#modal-video, #modal-image {
+    max-width: 90%;
+    max-height: 80%;
+}
+
+.modal-content {
+    text-align: center;
+    background-color: #222;
+    padding: 20px;
+    border-radius: 8px;
+    display: inline-block;
+    color: white;
+}
+
+.search-bar {
+    margin: 20px;
+    padding: 10px;
+    width: 300px;
+    border-radius: 8px;
+    border: none;
+    background-color: #333;
+    color: white;
+}
+
+.mode-switch {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.dark-mode {
+    background-color: #121212;
+    color: white;
+}
+
+.light-mode {
+    background-color: #f1f1f1;
+    color: black;
+}
